@@ -1,3 +1,4 @@
+
 export const COLOURS = ['red', 'green', 'blue', 'yellow'];
 const MAX_X = 10;
 const MAX_Y = 10;
@@ -11,6 +12,12 @@ export class Block {
 }
 
 export class BlockGrid {
+
+	deleteBlock() {
+		// remove block and move down all blocks that are above
+		// ( to simulate gravity)
+	}
+
     constructor () {
         this.grid = [];
 
@@ -50,9 +57,50 @@ export class BlockGrid {
         return this;
     }
 
+
+    adjacentInCollection (coll, block) {
+    	var foundGroup = [];
+    	var currentGroup = [];
+
+		for(let i =0; i < coll.length; i++) {
+			let curr = coll[i];
+			if(block.colour === curr.colour) {
+				currentGroup.push(curr);
+				if(block === curr) {
+					// we found the item, so this is the adjacent group
+					foundGroup = currentGroup;
+				}
+			} else {
+				// Entering new group
+				currentGroup = [];
+			}
+		}
+
+		return(foundGroup);  	
+    }
+
     blockClicked (e, block) {
-        console.log(e, block);
+
+        var col = this.grid[block.x];
+
+        //console.log(block)
+        // console.log(this.adjacentInCollection(col, block));
+        var adjacentBlocks = []
+
+        // get vertically adjacent rows
+        debugger;
+        this.adjacentInCollection(col, block).forEach((vAdjBlock) => {
+	        // and for each one of these, get horizontally adjacent rows
+	        let row = this.grid.map((col) => col[vAdjBlock.y]);
+	        this.adjacentInCollection(row, block).forEach((hAdjBlock) => {
+	        	adjacentBlocks.push(hAdjBlock);
+	        })
+        });
+
+        console.log(adjacentBlocks);
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => new BlockGrid().render());
+grid = new BlockGrid();
+
+window.addEventListener('DOMContentLoaded', () => grid.render());
