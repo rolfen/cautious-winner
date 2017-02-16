@@ -13,9 +13,19 @@ export class Block {
 
 export class BlockGrid {
 
-	deleteBlock() {
-		// remove block and move down all blocks that are above
-		// ( to simulate gravity)
+	deleteBlock(block) {
+		// move all blocks above down by one notch
+		for(let y = block.y; y < this.grid[block.x].length; y++) {
+			if (y === (this.grid[block.x].length - 1)) {
+				// insert grey block on top
+				this.grid[block.x][y] = new Block(block.x, y);
+				this.grid[block.x][y].colour = 'gray';
+			} else {
+				this.grid[block.x][y] = this.grid[block.x][y+1];
+				this.grid[block.x][y].y = y;
+				this.grid[block.x][y].x = block.x;
+			}
+		}
 	}
 
     constructor () {
@@ -58,9 +68,18 @@ export class BlockGrid {
     }
 
     getCluster (block) {
-    	var cluster = [];
 
-	    var floodMatch = (block, colour) => {
+		/*
+		 * Recursive function. Given a block, finds all blocks from similar color which are clustered around it
+		 * https://en.wikipedia.org/wiki/Flood_fill
+		 *
+		 * @param {Block} block A block object inside the cluster 
+		 * @param {string} colour Color of the cluster
+		 * @param {array} cluster A reference to an array which will be populated with all block in the cluster
+		 */
+	    var floodMatch = (block, colour, cluster) => {
+	    	// recursive function
+	    	// https://en.wikipedia.org/wiki/Flood_fill
 	    	if(block.colour === colour) {
 	    		cluster.push(block);
 		    	var x = block.x;
@@ -71,22 +90,33 @@ export class BlockGrid {
 		    	var west = this.grid[x][y-1];
 		    	[north,south,east,west].forEach((adjacentBlock)=>{
 		    		if(adjacentBlock && (cluster.indexOf(adjacentBlock) === -1)) {
-		    			floodMatch(adjacentBlock, colour);
+		    			floodMatch(adjacentBlock, colour, cluster);
 		    		}
 		    	});
 	    	}
 	    }
-	    floodMatch(block, block.colour)
+	    
+    	var cluster = [];
+	    floodMatch(block, block.colour, cluster);
 	    return cluster;
     }
 
     blockClicked (e, block) {
-
-        console.log(this.getCluster(block));
-
+        this.getCluster(block).forEach((clusterBlock) => {
+        	this.deleteBlock(clusterBlock);
+        });
     }
 }
 
-grid = new BlockGrid();
+var blockGrid = new BlockGrid();
 
-window.addEventListener('DOMContentLoaded', () => grid.render());
+window.addEventListener('DOMContentLoaded', () => {
+	var gridEl = document.querySelector('#gridEl');
+	gridEl.addEventListener('click', () => {
+		// re-render
+		gridEl.innerHTML = '';
+		blockGrid.render(gridEl);
+	}) 
+	// initial render
+	blockGrid.render(gridEl)
+});
