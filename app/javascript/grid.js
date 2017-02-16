@@ -57,47 +57,33 @@ export class BlockGrid {
         return this;
     }
 
+    getCluster (block) {
+    	var cluster = [];
 
-    adjacentInCollection (coll, block) {
-    	var foundGroup = [];
-    	var currentGroup = [];
-
-		for(let i =0; i < coll.length; i++) {
-			let curr = coll[i];
-			if(block.colour === curr.colour) {
-				currentGroup.push(curr);
-				if(block === curr) {
-					// we found the item, so this is the adjacent group
-					foundGroup = currentGroup;
-				}
-			} else {
-				// Entering new group
-				currentGroup = [];
-			}
-		}
-
-		return(foundGroup);  	
+	    var floodMatch = (block, colour) => {
+	    	if(block.colour === colour) {
+	    		cluster.push(block);
+		    	var x = block.x;
+		    	var y = block.y;
+		    	var north = this.grid[x+1] ? this.grid[x+1][y] : undefined;
+		    	var south = this.grid[x-1] ? this.grid[x-1][y] : undefined;
+		    	var east = this.grid[x][y+1];
+		    	var west = this.grid[x][y-1];
+		    	[north,south,east,west].forEach((adjacentBlock)=>{
+		    		if(adjacentBlock && (cluster.indexOf(adjacentBlock) === -1)) {
+		    			floodMatch(adjacentBlock, colour);
+		    		}
+		    	});
+	    	}
+	    }
+	    floodMatch(block, block.colour)
+	    return cluster;
     }
 
     blockClicked (e, block) {
 
-        var col = this.grid[block.x];
+        console.log(this.getCluster(block));
 
-        //console.log(block)
-        // console.log(this.adjacentInCollection(col, block));
-        var adjacentBlocks = []
-
-        // get vertically adjacent rows
-        debugger;
-        this.adjacentInCollection(col, block).forEach((vAdjBlock) => {
-	        // and for each one of these, get horizontally adjacent rows
-	        let row = this.grid.map((col) => col[vAdjBlock.y]);
-	        this.adjacentInCollection(row, block).forEach((hAdjBlock) => {
-	        	adjacentBlocks.push(hAdjBlock);
-	        })
-        });
-
-        console.log(adjacentBlocks);
     }
 }
 
