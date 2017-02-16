@@ -78,8 +78,6 @@ export class BlockGrid {
 		 * @param {array} cluster A reference to an array which will be populated with all block in the cluster
 		 */
 	    var floodMatch = (block, colour, cluster) => {
-	    	// recursive function
-	    	// https://en.wikipedia.org/wiki/Flood_fill
 	    	if(block.colour === colour) {
 	    		cluster.push(block);
 		    	var x = block.x;
